@@ -1202,6 +1202,91 @@
     const PLACE_BONUSES = [0.15, 0.10, 0.05];
     const DEFAULT_RATING_RULES = { rating: { ...RATING_RULES }, place: [...PLACE_BONUSES], awards: { goldenBall: 0.20, goldenBoot: 0.10, goldenAssist: 0.10 } };
 
+
+    // Restore the rating settings stored with this class. This function was missing,
+    // which caused class login to fail while loading saved state.
+    function currentRatingRules() {
+        return {
+            rating: { ...RATING_RULES },
+            place: [...PLACE_BONUSES],
+            awards: { ...AWARD_RULES }
+        };
+    }
+
+    function setRatingRules(rules) {
+        if (!rules || typeof rules !== 'object') return;
+        const rating = rules.rating || {};
+        for (const key of Object.keys(RATING_RULES)) {
+            const value = Number(rating[key]);
+            if (Number.isFinite(value) && value >= 0 && value <= 5) RATING_RULES[key] = value;
+        }
+        if (Array.isArray(rules.place)) {
+            rules.place.slice(0, 3).forEach((value, index) => {
+                value = Number(value);
+                if (Number.isFinite(value) && value >= 0 && value <= 5) PLACE_BONUSES[index] = value;
+            });
+        }
+        const awards = rules.awards || {};
+        for (const key of Object.keys(AWARD_RULES)) {
+            const value = Number(awards[key]);
+            if (Number.isFinite(value) && value >= 0 && value <= 5) AWARD_RULES[key] = value;
+        }
+    }
+
+    function applyRatingRulesFromState() {
+        const saved = allTimeStats && allTimeStats.__rules;
+        setRatingRules(saved && typeof saved === 'object' ? saved : DEFAULT_RATING_RULES);
+        renderRatingRules();
+    }
+
+    function renderAdminRules() {
+        const rules = currentRatingRules();
+        const fields = {
+            ruleGoal: rules.rating.goal,
+            ruleAssist: rules.rating.assist,
+            ruleOwnGoal: rules.rating.ownGoal,
+            ruleMvp: rules.rating.mvp,
+            ruleWin: rules.rating.win,
+            rulePlace1: rules.place[0],
+            rulePlace2: rules.place[1],
+            rulePlace3: rules.place[2],
+            ruleGoldenBall: rules.awards.goldenBall,
+            ruleGoldenBoot: rules.awards.goldenBoot,
+            ruleGoldenAssist: rules.awards.goldenAssist
+        };
+        for (const [id, value] of Object.entries(fields)) {
+            const el = document.getElementById(id);
+            if (el) el.value = Number(value).toString();
+        }
+    }
+
+    function readRulesForm() {
+        const read = id => {
+            const el = document.getElementById(id);
+            if (!el || el.value.trim() === '') return NaN;
+            return Number(el.value);
+        };
+        const next = {
+            rating: {
+                goal: read('ruleGoal'), assist: read('ruleAssist'), ownGoal: read('ruleOwnGoal'),
+                mvp: read('ruleMvp'), win: read('ruleWin')
+            },
+            place: [read('rulePlace1'), read('rulePlace2'), read('rulePlace3')],
+            awards: {
+                goldenBall: read('ruleGoldenBall'), goldenBoot: read('ruleGoldenBoot'),
+                goldenAssist: read('ruleGoldenAssist')
+            }
+        };
+        const values = [...Object.values(next.rating), ...next.place, ...Object.values(next.awards)];
+        return values.every(v => Number.isFinite(v) && v >= 0 && v <= 5) ? next : null;
+    }
+
+    // Updating rule values must not change saved player ratings by itself; all future
+    // calculations and the visible rule cards will use the newly saved values.
+    function recalculateRatingsForRules(oldRules, newRules) {
+        // Kept as a safe no-op for existing ratings to avoid changing class data unexpectedly.
+    }
+
     function renderRatingRules() {
         const grid = document.getElementById('ratingRulesGrid');
         if (!grid) return;
