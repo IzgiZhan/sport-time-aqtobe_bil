@@ -2562,7 +2562,7 @@ function shareCard(ctx, x, y, w, h, r = 28, fill = '#fff') {
             subscribeToOnlineChanges();
         } catch (e) {
             console.error(e); selectedClass = null; classPassword = null;
-            err.textContent = 'Wrong password or connection problem. Check the class password and try again.';
+            err.textContent = 'Login failed: ' + (e && e.message ? e.message : String(e));
         } finally { btn.disabled = false; btn.textContent = 'Log in'; }
     }
 
