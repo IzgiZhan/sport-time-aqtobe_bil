@@ -919,7 +919,7 @@
   <select id="classSelect" style="width:100%;padding:13px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);color:var(--text-main);font:inherit;margin-bottom:10px;"><option value="">Select class</option><option value="7A">7A</option><option value="7B">7B</option><option value="8A">8A</option><option value="8B">8B</option><option value="9A">9A</option><option value="9B">9B</option><option value="10A">10A</option><option value="10B">10B</option><option value="11A">11A</option><option value="11B">11B</option></select>
   <input id="classPasswordInput" type="password" autocomplete="current-password" placeholder="Class password" style="width:100%;box-sizing:border-box;padding:13px;border:1px solid var(--card-border);border-radius:12px;background:var(--input-bg);color:var(--text-main);font:inherit;">
   <div id="classLoginError" style="color:#e53e3e;font-size:13px;font-weight:700;margin-top:10px;min-height:18px;"></div>
-  <button id="classLoginBtn" class="btn btn-blue" style="width:100%;margin-top:8px;">Open class</button></div>
+  <button type="button" id="classLoginBtn" class="btn btn-blue" onclick="enterClass()" style="width:100%;margin-top:8px;cursor:pointer;">Log in</button></div>
 </div>
 
 <header>
@@ -2563,7 +2563,7 @@ function shareCard(ctx, x, y, w, h, r = 28, fill = '#fff') {
         } catch (e) {
             console.error(e); selectedClass = null; classPassword = null;
             err.textContent = 'Wrong password or connection problem. Check the class password and try again.';
-        } finally { btn.disabled = false; btn.textContent = 'Open class'; }
+        } finally { btn.disabled = false; btn.textContent = 'Log in'; }
     }
 
     // ---------- Backups (drafts) ----------
@@ -2848,7 +2848,7 @@ function shareCard(ctx, x, y, w, h, r = 28, fill = '#fff') {
     window.onload = async function() {
         initTheme();
         const select = document.getElementById('classSelect');
-        CLASS_NAMES.forEach(name => { const option = document.createElement('option'); option.value = name; option.textContent = name; select.appendChild(option); });
+        // Class options are defined in the HTML so they remain available even if scripts load slowly.
         document.getElementById('classLoginBtn').addEventListener('click', enterClass);
         document.getElementById('classPasswordInput').addEventListener('keydown', e => { if (e.key === 'Enter') enterClass(); });
         document.getElementById('classGate').style.display = 'flex';
